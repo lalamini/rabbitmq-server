@@ -1,13 +1,13 @@
 load(
-    "@rules_erlang//:util.bzl",
-    "path_join",
-    "windows_path",
-)
-load(
-    "//bazel/elixir:elixir_toolchain.bzl",
+    "@rules_elixir//:elixir_toolchain.bzl",
     "elixir_dirs",
     "erlang_dirs",
     "maybe_install_erlang",
+)
+load(
+    "@rules_erlang//:util.bzl",
+    "path_join",
+    "windows_path",
 )
 
 def _impl(ctx):
@@ -120,7 +120,7 @@ rabbitmqctl_check_formatted_private_test = rule(
         "data": attr.label_list(allow_files = True),
     },
     toolchains = [
-        "//bazel/elixir:toolchain_type",
+        "@rules_elixir//:toolchain_type",
     ],
     test = True,
 )

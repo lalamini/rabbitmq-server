@@ -120,7 +120,7 @@ name = String.to_atom(Atom.to_string(app) <> "_escript")
 module = String.to_atom(System.get_env("MAIN_MODULE"))
 
 :application.ensure_all_started(:mix)
-
+Mix.State.start_link(:none)
 [{_, bytecode}] = ElixirEscriptMain.gen_main(project, name, module, app, :elixir)
 
 {:ok, file} = File.open(output, [:write])

@@ -50,6 +50,16 @@ bazel_dep(
 )
 
 bazel_dep(
+    name = "rules_elixir",
+    version = "0.1.0",
+)
+
+local_path_override(
+    module_name = "rules_elixir",
+    path = "../rules_elixir",
+)
+
+bazel_dep(
     name = "com_github_rabbitmq_looking_glass",
     version = "0.2.2",
     dev_dependency = True,
@@ -73,7 +83,7 @@ use_repo(
 )
 
 elixir_config = use_extension(
-    "//bazel/bzlmod:extensions.bzl",
+    "@rules_elixir//bzlmod:extensions.bzl",
     "elixir_config",
 )
 

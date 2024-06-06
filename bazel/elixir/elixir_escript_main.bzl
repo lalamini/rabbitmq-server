@@ -1,5 +1,5 @@
 load(
-    ":elixir_toolchain.bzl",
+    "@rules_elixir//:elixir_toolchain.bzl",
     "elixir_dirs",
     "erlang_dirs",
     "maybe_install_erlang",
@@ -71,5 +71,7 @@ elixir_escript_main = rule(
         ),
         "out": attr.output(),
     },
-    toolchains = ["//bazel/elixir:toolchain_type"],
+    toolchains = [
+        "@rules_elixir//:toolchain_type",
+    ],
 )

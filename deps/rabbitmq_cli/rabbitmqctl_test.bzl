@@ -1,5 +1,11 @@
 load("@bazel_skylib//lib:shell.bzl", "shell")
 load(
+    "@rules_elixir//:elixir_toolchain.bzl",
+    "elixir_dirs",
+    "erlang_dirs",
+    "maybe_install_erlang",
+)
+load(
     "@rules_erlang//:erlang_app_info.bzl",
     "ErlangAppInfo",
 )
@@ -11,12 +17,6 @@ load(
 load(
     "@rules_erlang//private:util.bzl",
     "additional_file_dest_relative_path",
-)
-load(
-    "//bazel/elixir:elixir_toolchain.bzl",
-    "elixir_dirs",
-    "erlang_dirs",
-    "maybe_install_erlang",
 )
 load(
     ":rabbitmqctl.bzl",
@@ -222,7 +222,7 @@ rabbitmqctl_private_test = rule(
         ),
     },
     toolchains = [
-        "//bazel/elixir:toolchain_type",
+        "@rules_elixir//:toolchain_type",
     ],
     test = True,
 )

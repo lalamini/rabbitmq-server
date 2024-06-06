@@ -1,13 +1,13 @@
 load("@bazel_skylib//lib:shell.bzl", "shell")
 load(
-    "@rules_erlang//private:util.bzl",
-    "additional_file_dest_relative_path",
-)
-load(
-    "//bazel/elixir:elixir_toolchain.bzl",
+    "@rules_elixir//:elixir_toolchain.bzl",
     "elixir_dirs",
     "erlang_dirs",
     "maybe_install_erlang",
+)
+load(
+    "@rules_erlang//private:util.bzl",
+    "additional_file_dest_relative_path",
 )
 
 def _impl(ctx):
@@ -127,6 +127,6 @@ mix_archive_build = rule(
         "out": attr.output(),
     },
     toolchains = [
-        ":toolchain_type",
+        "@rules_elixir//:toolchain_type",
     ],
 )

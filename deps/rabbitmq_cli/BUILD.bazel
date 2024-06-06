@@ -10,24 +10,23 @@ load("//:rabbitmq_home.bzl", "rabbitmq_home")
 load("//:rabbitmq_run.bzl", "rabbitmq_run")
 load("//:rabbitmq.bzl", "APP_VERSION", "RABBITMQ_DIALYZER_OPTS", "STARTS_BACKGROUND_BROKER_TAG", "without")
 load(
-    "@rabbitmq-server//bazel/elixir:mix_archive_build.bzl",
+    "//bazel/elixir:mix_archive_build.bzl",
     "mix_archive_build",
 )
 load(
-    "@rabbitmq-server//bazel/elixir:elixir_bytecode.bzl",
+    "@rules_elixir//:elixir_bytecode.bzl",
     "elixir_bytecode",
 )
-
-# load(
-#     "@rabbitmq-server//bazel/elixir:elixir_ebin_dir.bzl",
-#     "elixir_ebin_dir",
-# )
 load(
-    "@rabbitmq-server//bazel/elixir:erlang_app_filter_module_conflicts.bzl",
+    "@rules_elixir//:elixir_ebin_dir.bzl",
+    "elixir_ebin_dir",
+)
+load(
+    "@rules_elixir//:erlang_app_filter_module_conflicts.bzl",
     "erlang_app_filter_module_conflicts",
 )
 load(
-    "@rabbitmq-server//bazel/elixir:elixir_escript_main.bzl",
+    "//bazel/elixir:elixir_escript_main.bzl",
     "elixir_escript_main",
 )
 
@@ -97,12 +96,12 @@ app_file(
     modules = [":beam_files"],
 )
 
-# elixir_ebin_dir(
-#     name = "ebin",
-#     beam_files_dir = ":beam_files",
-#     app_file = ":app_file",
-#     dest = "ebin",
-# )
+elixir_ebin_dir(
+    name = "ebin",
+    beam_files_dir = ":beam_files",
+    app_file = ":app_file",
+    dest = "ebin",
+)
 
 # need to have a rule to produce elixir as an ErlangAppInfo, without
 # the conflicts from the :beam_files
@@ -110,25 +109,26 @@ app_file(
 # then that elixir can be part of the deps of this erlang app
 # then we have to make the escript, then we can remove the rabbitmqctl rule
 erlang_app_filter_module_conflicts(
-    name = "elixir2",
-    src = "//bazel/elixir:erlang_app",
-    without = [":beam_files"],
+    name = "elixir_without_rabbitmqctl_overlap",
+    dest = "unconsolidated",
+    src = "@rules_elixir//elixir:elixir",
+    without = [":ebin"],
 )
 
 erlang_app_info(
-    name = "erlang_app2",
+    name = "erlang_app",
     srcs = SRCS,
     hdrs = [],
-    app = ":app_file",
+    # app = ":app_file",
     app_name = APP_NAME,
-    beam = [":beam_files"],
+    beam = [":ebin"],
     extra_apps = EXTRA_APPS,
     license_files = glob(["LICENSE*"]),
     priv = [],
     visibility = ["//visibility:public"],
     deps = [
-        ":elixir2",
-        "//bazel/elixir:logger",
+        ":elixir_without_rabbitmqctl_overlap",
+        "@rules_elixir//elixir:logger",
     ] + DEPS,
 )
 
@@ -141,11 +141,11 @@ elixir_escript_main(
 )
 
 escript_archive(
-    name = "rabbitmqctl2",
-    app = ":erlang_app2",
+    name = "rabbitmqctl",
+    app = ":erlang_app",
     beam = [":escript_main"],
-    drop_hrl = True,  # no-op for now
-    flat = True,  # no-op for now
+    drop_hrl = True,
+    flat = True,
     headers = [
         "shebang",
         '{emu_args, "-escript main rabbitmqctl_escript -hidden"}',
@@ -154,29 +154,29 @@ escript_archive(
 )
 
 # Note: All the various rabbitmq-* scripts are just copies of rabbitmqctl
-rabbitmqctl(
-    name = "rabbitmqctl",
-    srcs = [
-        "config/config.exs",
-        "mix.exs",
-    ] + glob([
-        "lib/**/*.ex",
-    ]),
-    archives = [
-        "@hex//:archive",
-    ],
-    license_files = glob(["LICENSE*"]),
-    source_deps = {
-        "@csv//:sources": "csv",
-        "@json//:sources": "json",
-    },
-    visibility = ["//visibility:public"],
-    deps = [
-        "//deps/rabbit_common:erlang_app",
-        "@observer_cli//:erlang_app",
-        "@stdout_formatter//:erlang_app",
-    ],
-)
+# rabbitmqctl(
+#     name = "rabbitmqctl",
+#     srcs = [
+#         "config/config.exs",
+#         "mix.exs",
+#     ] + glob([
+#         "lib/**/*.ex",
+#     ]),
+#     archives = [
+#         "@hex//:archive",
+#     ],
+#     license_files = glob(["LICENSE*"]),
+#     source_deps = {
+#         "@csv//:sources": "csv",
+#         "@json//:sources": "json",
+#     },
+#     visibility = ["//visibility:public"],
+#     deps = [
+#         "//deps/rabbit_common:erlang_app",
+#         "@observer_cli//:erlang_app",
+#         "@stdout_formatter//:erlang_app",
+#     ],
+# )
 
 rabbitmq_home(
     name = "broker-for-cli-tests-home",
@@ -287,12 +287,12 @@ plt(
         ":json_ez",
     ],
     ignore_warnings = True,
-    libs = [":elixir"],
+    libs = ["@rules_elixir//elixir:elixir"],
     deps = [
-        ":elixir",
-        "//bazel/elixir:logger",
         "//deps/rabbit:erlang_app",
         "//deps/rabbit_common:erlang_app",
+        "@rules_elixir//elixir:elixir",
+        "@rules_elixir//elixir:logger",
     ],
 )
 
@@ -302,7 +302,7 @@ dialyze(
         "-Wunknown",
         RABBITMQ_DIALYZER_OPTS,
     ),
-    libs = [":elixir"],
+    libs = ["@rules_elixir//elixir:elixir"],
     plt = ":deps_plt",
 )
 
