@@ -71,11 +71,16 @@ elixir_bytecode(
     env = {
         "HOME": '"$(mktemp -d)"',
         "MIX_ENV": "prod",
+        "DEPS_DIR": "$ERL_LIBS",
     },
     ez_deps = [
         ":csv.ez",
         ":json.ez",
     ],
+    setup = """\
+mkdir -p _build/$MIX_ENV/lib/csv
+cp -RL $ERL_LIBS/csv/ebin _build/$MIX_ENV/lib/csv
+""",
     deps = DEPS,
 )
 
@@ -134,8 +139,11 @@ erlang_app_info(
 
 elixir_escript_main(
     name = "escript_main",
+    env = {
+        "HOME": '"$(mktemp -d)"',
+    },
     out = "rabbitmqctl_escript.beam",
-    app = APP_NAME,
+    app = ":erlang_app",
     main_module = "RabbitMQCtl",
     mix_config = "config/config.exs",
 )

@@ -4,10 +4,21 @@ load(
     "erlang_dirs",
     "maybe_install_erlang",
 )
+load(
+    "@rules_erlang//:erlang_app_info.bzl",
+    "ErlangAppInfo",
+)
 
 def _impl(ctx):
     (erlang_home, _, erlang_runfiles) = erlang_dirs(ctx)
     (elixir_home, elixir_runfiles) = elixir_dirs(ctx)
+
+    app_info = ctx.attr.app[ErlangAppInfo]
+
+    env = "\n".join([
+        "export {}={}".format(k, v)
+        for k, v in ctx.attr.env.items()
+    ])
 
     config_path = ""
     if ctx.file.mix_config != None:
@@ -28,6 +39,8 @@ export CONFIG_PATH="{config_path}"
 export APP="{app}"
 export MAIN_MODULE="Elixir.{main_module}"
 
+{env}
+
 export PATH="{erlang_home}/bin:$PATH"
 set -x
 "{elixir_home}"/bin/elixir {script}
@@ -35,10 +48,11 @@ set -x
         maybe_install_erlang = maybe_install_erlang(ctx),
         erlang_home = erlang_home,
         elixir_home = elixir_home,
+        env = env,
         script = ctx.file._script.path,
         out = ctx.outputs.out.path,
         config_path = config_path,
-        app = ctx.attr.app,
+        app = app_info.app_name,
         main_module = ctx.attr.main_module,
     )
 
@@ -64,7 +78,10 @@ elixir_escript_main = rule(
             allow_single_file = True,
             default = Label(":elixir_escript_main.exs"),
         ),
-        "app": attr.string(),
+        "app": attr.label(
+            providers = [ErlangAppInfo],
+        ),
+        "env": attr.string_dict(),
         "main_module": attr.string(),
         "mix_config": attr.label(
             allow_single_file = [".exs"],

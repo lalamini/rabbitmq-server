@@ -49,6 +49,11 @@ bazel_dep(
     version = "3.15.1",
 )
 
+local_path_override(
+    module_name = "rules_erlang",
+    path = "../rules_erlang",
+)
+
 bazel_dep(
     name = "rules_elixir",
     version = "0.1.0",
