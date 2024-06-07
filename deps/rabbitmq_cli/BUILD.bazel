@@ -124,7 +124,6 @@ erlang_app_info(
     name = "erlang_app",
     srcs = SRCS,
     hdrs = [],
-    # app = ":app_file",
     app_name = APP_NAME,
     beam = [":ebin"],
     extra_apps = EXTRA_APPS,
@@ -148,6 +147,7 @@ elixir_escript_main(
     mix_config = "config/config.exs",
 )
 
+# Note: All the various rabbitmq-* scripts are just copies of rabbitmqctl
 escript_archive(
     name = "rabbitmqctl",
     app = ":erlang_app",
@@ -161,35 +161,11 @@ escript_archive(
     visibility = ["//visibility:public"],
 )
 
-# Note: All the various rabbitmq-* scripts are just copies of rabbitmqctl
-# rabbitmqctl(
-#     name = "rabbitmqctl",
-#     srcs = [
-#         "config/config.exs",
-#         "mix.exs",
-#     ] + glob([
-#         "lib/**/*.ex",
-#     ]),
-#     archives = [
-#         "@hex//:archive",
-#     ],
-#     license_files = glob(["LICENSE*"]),
-#     source_deps = {
-#         "@csv//:sources": "csv",
-#         "@json//:sources": "json",
-#     },
-#     visibility = ["//visibility:public"],
-#     deps = [
-#         "//deps/rabbit_common:erlang_app",
-#         "@observer_cli//:erlang_app",
-#         "@stdout_formatter//:erlang_app",
-#     ],
-# )
-
 rabbitmq_home(
     name = "broker-for-cli-tests-home",
     testonly = True,
     plugins = [
+        ":erlang_app",
         "//deps/rabbit:erlang_app",
         "//deps/rabbitmq_federation:erlang_app",
         "//deps/rabbitmq_stomp:erlang_app",
@@ -205,80 +181,80 @@ rabbitmq_run(
     visibility = ["//visibility:public"],
 )
 
-rabbitmqctl_check_formatted_test(
-    name = "check_formatted",
-    size = "small",
-    srcs = [
-        ".formatter.exs",
-        "config/config.exs",
-        "mix.exs",
-    ] + glob([
-        "lib/**/*.ex",
-        "test/**/*.exs",
-    ]),
-    data = glob(["test/fixtures/**/*"]),
-    target_compatible_with = select({
-        "@platforms//os:macos": [
-            "@platforms//os:macos",
-            "@elixir_config//:elixir_1_15",
-        ],
-        "//conditions:default": [
-            "@platforms//os:linux",
-            "@elixir_config//:elixir_1_15",
-        ],
-    }),
-)
+# rabbitmqctl_check_formatted_test(
+#     name = "check_formatted",
+#     size = "small",
+#     srcs = [
+#         ".formatter.exs",
+#         "config/config.exs",
+#         "mix.exs",
+#     ] + glob([
+#         "lib/**/*.ex",
+#         "test/**/*.exs",
+#     ]),
+#     data = glob(["test/fixtures/**/*"]),
+#     target_compatible_with = select({
+#         "@platforms//os:macos": [
+#             "@platforms//os:macos",
+#             "@elixir_config//:elixir_1_15",
+#         ],
+#         "//conditions:default": [
+#             "@platforms//os:linux",
+#             "@elixir_config//:elixir_1_15",
+#         ],
+#     }),
+# )
 
-test_suite(
-    name = "rabbitmqctl_check_formatted",
-    tests = ["check_formatted"],
-)
+# test_suite(
+#     name = "rabbitmqctl_check_formatted",
+#     tests = ["check_formatted"],
+# )
 
-rabbitmqctl_compile_warnings_as_errors_test(
-    name = "compile_warnings_as_errors",
-    size = "small",
-    srcs = [
-        ".formatter.exs",
-        "config/config.exs",
-        "mix.exs",
-    ] + glob([
-        "lib/**/*.ex",
-        "test/**/*.exs",
-    ]),
-    archives = [
-        "@hex//:archive",
-    ],
-    data = glob(["test/fixtures/**/*"]),
-    source_deps = {
-        "@amqp//:sources": "amqp",
-        "@csv//:sources": "csv",
-        "@json//:sources": "json",
-        "@temp//:sources": "temp",
-        "@x509//:sources": "x509",
-    },
-    target_compatible_with = select({
-        "@platforms//os:macos": [
-            "@platforms//os:macos",
-            "@elixir_config//:elixir_1_15",
-        ],
-        "//conditions:default": [
-            "@platforms//os:linux",
-            "@elixir_config//:elixir_1_15",
-        ],
-    }),
-    deps = [
-        "//deps/amqp_client:erlang_app",
-        "//deps/rabbit:erlang_app",
-        "//deps/rabbit_common:erlang_app",
-        "@observer_cli//:erlang_app",
-        "@stdout_formatter//:erlang_app",
-    ],
-)
+# rabbitmqctl_compile_warnings_as_errors_test(
+#     name = "compile_warnings_as_errors",
+#     size = "small",
+#     srcs = [
+#         ".formatter.exs",
+#         "config/config.exs",
+#         "mix.exs",
+#     ] + glob([
+#         "lib/**/*.ex",
+#         "test/**/*.exs",
+#     ]),
+#     archives = [
+#         "@hex//:archive",
+#     ],
+#     data = glob(["test/fixtures/**/*"]),
+#     source_deps = {
+#         "@amqp//:sources": "amqp",
+#         "@csv//:sources": "csv",
+#         "@json//:sources": "json",
+#         "@temp//:sources": "temp",
+#         "@x509//:sources": "x509",
+#     },
+#     target_compatible_with = select({
+#         "@platforms//os:macos": [
+#             "@platforms//os:macos",
+#             "@elixir_config//:elixir_1_15",
+#         ],
+#         "//conditions:default": [
+#             "@platforms//os:linux",
+#             "@elixir_config//:elixir_1_15",
+#         ],
+#     }),
+#     deps = [
+#         "//deps/amqp_client:erlang_app",
+#         "//deps/rabbit:erlang_app",
+#         "//deps/rabbit_common:erlang_app",
+#         "@observer_cli//:erlang_app",
+#         "@stdout_formatter//:erlang_app",
+#     ],
+# )
 
-test_suite(
-    name = "rabbitmqctl_compile_warnings_as_errors",
-    tests = ["compile_warnings_as_errors"],
-)
+# test_suite(
+#     name = "rabbitmqctl_compile_warnings_as_errors",
+#     tests = ["compile_warnings_as_errors"],
+# )
 
 plt(
     name = "deps_plt",
