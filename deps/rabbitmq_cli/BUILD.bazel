@@ -1,26 +1,18 @@
-load("@rules_erlang//:dialyze.bzl", "dialyze", "plt")
-load("@rules_erlang//:app_file2.bzl", "app_file")
-load("@rules_erlang//:erlang_app_info.bzl", "erlang_app_info")
-load("@rules_erlang//:escript.bzl", "escript_archive")
-load(":rabbitmqctl.bzl", "rabbitmqctl")
-load(":rabbitmqctl_check_formatted.bzl", "rabbitmqctl_check_formatted_test")
-load(":rabbitmqctl_compile_warnings_as_errors.bzl", "rabbitmqctl_compile_warnings_as_errors_test")
-load(":rabbitmqctl_test.bzl", "rabbitmqctl_test")
-load("//:rabbitmq_home.bzl", "rabbitmq_home")
-load("//:rabbitmq_run.bzl", "rabbitmq_run")
-load("//:rabbitmq.bzl", "APP_VERSION", "RABBITMQ_DIALYZER_OPTS", "STARTS_BACKGROUND_BROKER_TAG", "without")
 load(
-    "//bazel/elixir:mix_archive_build.bzl",
-    "mix_archive_build",
-)
-load(
-    "@rules_elixir//:elixir_ebin_dir.bzl",
+    "@rules_elixir//private:elixir_ebin_dir.bzl",
     "elixir_ebin_dir",
 )
 load(
-    "@rules_elixir//:erlang_app_filter_module_conflicts.bzl",
+    "@rules_elixir//private:erlang_app_filter_module_conflicts.bzl",
     "erlang_app_filter_module_conflicts",
 )
+load("@rules_erlang//:app_file2.bzl", "app_file")
+load("@rules_erlang//:dialyze.bzl", "dialyze", "plt")
+load("@rules_erlang//:erlang_app_info.bzl", "erlang_app_info")
+load("@rules_erlang//:escript.bzl", "escript_archive")
+load("//:rabbitmq.bzl", "APP_VERSION", "RABBITMQ_DIALYZER_OPTS", "STARTS_BACKGROUND_BROKER_TAG", "without")
+load("//:rabbitmq_home.bzl", "rabbitmq_home")
+load("//:rabbitmq_run.bzl", "rabbitmq_run")
 load(
     "//bazel/elixir:elixir_bytecode.bzl",
     "elixir_bytecode",
@@ -29,6 +21,14 @@ load(
     "//bazel/elixir:elixir_escript_main.bzl",
     "elixir_escript_main",
 )
+load(
+    "//bazel/elixir:mix_archive_build.bzl",
+    "mix_archive_build",
+)
+# load(":rabbitmqctl.bzl", "rabbitmqctl")
+# load(":rabbitmqctl_check_formatted.bzl", "rabbitmqctl_check_formatted_test")
+# load(":rabbitmqctl_compile_warnings_as_errors.bzl", "rabbitmqctl_compile_warnings_as_errors_test")
+load(":rabbitmqctl_test.bzl", "rabbitmqctl_test")
 
 mix_archive_build(
     name = "csv_ez",
@@ -86,7 +86,7 @@ cp -RL $ERL_LIBS/csv/ebin _build/$MIX_ENV/lib/csv
 
 app_file(
     name = "app_file",
-    out = "rabbitmqctl.app",
+    out = "%s.app" % APP_NAME,
     app_description = APP_NAME,
     app_env = """[{scopes,[{'rabbitmq-plugins',plugins},
                              {rabbitmqctl,ctl},
