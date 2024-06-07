@@ -14,16 +14,16 @@ load(
     "mix_archive_build",
 )
 load(
-    "@rules_elixir//:elixir_bytecode.bzl",
-    "elixir_bytecode",
-)
-load(
     "@rules_elixir//:elixir_ebin_dir.bzl",
     "elixir_ebin_dir",
 )
 load(
     "@rules_elixir//:erlang_app_filter_module_conflicts.bzl",
     "erlang_app_filter_module_conflicts",
+)
+load(
+    "//bazel/elixir:elixir_bytecode.bzl",
+    "elixir_bytecode",
 )
 load(
     "//bazel/elixir:elixir_escript_main.bzl",
@@ -66,7 +66,7 @@ elixir_bytecode(
     srcs = SRCS,
     dest = "beam_files",
     elixirc_opts = [
-        "-e ':application.ensure_all_started(:mix)'",
+        "-e", ":application.ensure_all_started(:mix)",
     ],
     env = {
         "HOME": '"$(mktemp -d)"',
