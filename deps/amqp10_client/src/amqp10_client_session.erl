@@ -868,7 +868,7 @@ send_attach(Send, #{name := Name, role := RoleTuple} = Args, {FromPid, _},
                             target = Target,
                             max_message_size = MaxMessageSize},
     ok = Send(Attach, State),
-
+
     Ref = make_link_ref(Role, self(), OutHandle),
     Link = #link{name = Name,
                  ref = Ref,
