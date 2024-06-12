@@ -17,9 +17,8 @@ build_dispatcher(Ignore) ->
     cowboy_router:compile(Routes).
 
 build_routes(Ignore) ->
-    ManagementApp = module_app(?MODULE),
     Prefix = rabbit_mgmt_util:get_path_prefix(),
-    RootIdxRtes = build_root_index_routes(Prefix, ManagementApp),
+    RootIdxRtes = build_root_index_routes(Prefix),
     ApiRdrRte = build_redirect_route("/api", Prefix ++ "/api/index.html"),
     CliRdrRte = build_redirect_route("/cli", Prefix ++ "/cli/index.html"),
     StatsRdrRte1 = build_redirect_route("/stats", Prefix ++ "/api/index.html"),
@@ -36,11 +35,11 @@ build_routes(Ignore) ->
     Routes2 = RootIdxRtes ++ OauthBootstrap ++ maybe_add_path_prefix([{"/login", rabbit_mgmt_login, []}], Prefix) ++ Routes1,
     [{'_', Routes2}].
 
-build_root_index_routes("", ManagementApp) ->
-    [{"/", rabbit_mgmt_wm_static, root_idx_file(ManagementApp)}];
-build_root_index_routes(Prefix, ManagementApp) ->
+build_root_index_routes("") ->
+    [{"/", rabbit_mgmt_index, #{}}];
+build_root_index_routes(Prefix) ->
     [{"/", rabbit_mgmt_wm_redirect, Prefix ++ "/"},
-     {Prefix, rabbit_mgmt_wm_static, root_idx_file(ManagementApp)}].
+     {Prefix, rabbit_mgmt_index, #{}}].
 
 build_oauth_bootstrap_route("") ->
     [{"/js/oidc-oauth/bootstrap.js", rabbit_mgmt_oauth_bootstrap, #{}}];
@@ -51,8 +50,8 @@ build_oauth_bootstrap_route(Prefix) ->
 build_redirect_route(Path, Location) ->
     {Path, rabbit_mgmt_wm_redirect, Location}.
 
-root_idx_file(ManagementApp) ->
-    {priv_file, ManagementApp, "www/index.html"}.
+%root_idx_file(ManagementApp) ->
+%    {priv_file, ManagementApp, "www/index.html"}.
 
 maybe_add_path_prefix(Routes, "") ->
     Routes;

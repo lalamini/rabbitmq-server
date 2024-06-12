@@ -13,7 +13,8 @@
 
 all() ->
     [
-     {group, parallel_tests}
+     {group, parallel_tests},
+     {group, index}
     ].
 
 groups() ->
@@ -23,15 +24,29 @@ groups() ->
                                    pack_binding_test,
                                    default_restrictions,
                                    path_prefix_test
-                                  ]}
+                                  ]},
+     {index, [], [
+                index_html_import_javascript_libraries,
+                index_html_has_body,
+                 {without_oaouth, [], [index_html_with_oauth_disabled]},                                        
+                 {with_oaouth, [], [index_html_import_all_oauth_libraries]}
+                 ]}
     ].
 
 %% -------------------------------------------------------------------
 %% Setup/teardown.
 %% -------------------------------------------------------------------
 
+init_per_group(without_oauth, Config) ->
+    Config;
+init_per_group(with_oauth, Config) ->
+    Config;
+
 init_per_group(_, Config) ->
     Config.
+
+end_per_group(with_oauth, Config) ->
+    Config;
 
 end_per_group(_, Config) ->
     Config.
@@ -95,6 +110,9 @@ path_prefix_test(_Config) ->
 
 default_restrictions(_) ->
     ?assertEqual(false, rabbit_mgmt_features:is_op_policy_updating_disabled()).
+
+index_html_import_javascript_libraries(_) ->
+    
 
 %%--------------------------------------------------------------------
 
