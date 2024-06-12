@@ -210,8 +210,6 @@ init_it2(Recover, From, State = #q{q                   = Q,
                (Res == created orelse Res == existing) ->
             case matches(Recover, Q, Q1) of
                 true ->
-                    ok = file_handle_cache:register_callback(
-                           rabbit_amqqueue, set_maximum_since_use, [self()]),
                     ok = rabbit_memory_monitor:register(
                            self(), {rabbit_amqqueue,
                                     set_ram_duration_target, [self()]}),
@@ -1194,7 +1192,6 @@ prioritise_cast(Msg, _Len, State) ->
         delete_immediately                   -> 8;
         {delete_exclusive, _Pid}             -> 8;
         {set_ram_duration_target, _Duration} -> 8;
-        {set_maximum_since_use, _Age}        -> 8;
         {run_backing_queue, _Mod, _Fun}      -> 6;
         {ack, _AckTags, _ChPid}              -> 4; %% [1]
         {resume, _ChPid}                     -> 3;
@@ -1509,10 +1506,6 @@ handle_cast({set_ram_duration_target, Duration},
             State = #q{backing_queue = BQ, backing_queue_state = BQS}) ->
     BQS1 = BQ:set_ram_duration_target(Duration, BQS),
     noreply(State#q{backing_queue_state = BQS1});
-
-handle_cast({set_maximum_since_use, Age}, State) ->
-    ok = file_handle_cache:set_maximum_since_use(Age),
-    noreply(State);
 
 handle_cast({credit, SessionPid, CTag, Credit, Drain},
             #q{q = Q,
